@@ -1,3 +1,5 @@
+import math
+
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
@@ -43,22 +45,40 @@ for contour in contours:
     if len(approx) == 3:
         cv2.putText(img, 'Triangle', (x, y),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-
     elif len(approx) == 4:
-        cv2.putText(img, 'Quadrilateral', (x, y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-
+        x1, y1, w, h = cv2.boundingRect(approx)
+        aspect_ratio = float(w) / h
+        if 0.95 <= aspect_ratio <= 1.05:
+            cv2.putText(img, 'Square', (x, y),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        else:
+            cv2.putText(img, 'Rectangle', (x, y),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
     elif len(approx) == 5:
         cv2.putText(img, 'Pentagon', (x, y),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-
     elif len(approx) == 6:
         cv2.putText(img, 'Hexagon', (x, y),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-
+    elif len(approx) == 8:
+        x1, y1, w, h = cv2.boundingRect(approx)
+        aspect_ratio = float(w) / h
+        if 0.95 <= aspect_ratio <= 1.05:
+            cv2.putText(img, 'Octagon', (x, y),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        else:
+            cv2.putText(img, 'Irregular Polygon', (x, y),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
     else:
-        cv2.putText(img, 'circle', (x, y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        area = cv2.contourArea(approx)
+        perimeter = cv2.arcLength(approx, True)
+        circularity = 4 * math.pi * (area / (perimeter * perimeter))
+        if circularity > 0.8:
+            cv2.putText(img, 'Circle', (x, y),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        else:
+            cv2.putText(img, 'Irregular Shape', (x, y),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
 # displaying the image after drawing contours
 cv2.imshow('shapes', img)
