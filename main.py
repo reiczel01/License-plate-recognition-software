@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # reading image
-img = cv2.imread('shapes.jpg')
+img = cv2.imread('shapes2.png')
 
 # converting image into grayscale image
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -16,6 +16,9 @@ _, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 # using a findContours() function
 contours, _ = cv2.findContours(
     threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+# Red color in BGR
+color = (0, 0, 255)
 
 i = 0
 
@@ -44,41 +47,41 @@ for contour in contours:
     # putting shape name at center of each shape
     if len(approx) == 3:
         cv2.putText(img, 'Triangle', (x, y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
     elif len(approx) == 4:
         x1, y1, w, h = cv2.boundingRect(approx)
         aspect_ratio = float(w) / h
         if 0.95 <= aspect_ratio <= 1.05:
             cv2.putText(img, 'Square', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
         else:
             cv2.putText(img, 'Rectangle', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
     elif len(approx) == 5:
         cv2.putText(img, 'Pentagon', (x, y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
     elif len(approx) == 6:
         cv2.putText(img, 'Hexagon', (x, y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
     elif len(approx) == 8:
         x1, y1, w, h = cv2.boundingRect(approx)
         aspect_ratio = float(w) / h
         if 0.95 <= aspect_ratio <= 1.05:
             cv2.putText(img, 'Octagon', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
         else:
             cv2.putText(img, 'Irregular Polygon', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
     else:
         area = cv2.contourArea(approx)
         perimeter = cv2.arcLength(approx, True)
         circularity = 4 * math.pi * (area / (perimeter * perimeter))
         if circularity > 0.8:
             cv2.putText(img, 'Circle', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
         else:
             cv2.putText(img, 'Irregular Shape', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
 # displaying the image after drawing contours
 cv2.imshow('shapes', img)
