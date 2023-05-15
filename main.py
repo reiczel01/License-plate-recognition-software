@@ -1,92 +1,80 @@
-import math
-
 import cv2
+import pickle
+import cvzone
 import numpy as np
-from matplotlib import pyplot as plt
 
-# reading image
-img = cv2.imread('shapes2.png')
+cap = cv2.VideoCapture('carPark.mp4')
+width, height = 103, 43
+with open('polygons', 'rb') as f:
+    posList = pickle.load(f)
 
-# converting image into grayscale image
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# setting threshold of gray image
-_, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+def empty(a):
+    pass
 
-# using a findContours() function
-contours, _ = cv2.findContours(
-    threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-# Red color in BGR
-color = (0, 0, 255)
+cv2.namedWindow("Vals")
+cv2.resizeWindow("Vals", 640, 240)
+cv2.createTrackbar("Val1", "Vals", 25, 50, empty)
+cv2.createTrackbar("Val2", "Vals", 16, 50, empty)
+cv2.createTrackbar("Val3", "Vals", 5, 50, empty)
 
-i = 0
 
-# list for storing names of shapes
-for contour in contours:
+def checkSpaces():
+    spaces = 0
+    for pos in posList:
+        x, y = pos
+        w, h = width, height
 
-    # here we are ignoring first counter because
-    # findcontour function detects whole image as shape
-    if i == 0:
-        i = 1
-        continue
+        imgCrop = imgThres[y:y + h, x:x + w]
+        count = cv2.countNonZero(imgCrop)
 
-    # cv2.approxPloyDP() function to approximate the shape
-    approx = cv2.approxPolyDP(
-        contour, 0.01 * cv2.arcLength(contour, True), True)
+        if count < 900:
+            color = (0, 200, 0)
+            thic = 5
+            spaces += 1
 
-    # using drawContours() function
-    cv2.drawContours(img, [contour], 0, (0, 0, 255), 5)
-
-    # finding center point of shape
-    M = cv2.moments(contour)
-    if M['m00'] != 0.0:
-        x = int(M['m10'] / M['m00'])
-        y = int(M['m01'] / M['m00'])
-
-    # putting shape name at center of each shape
-    if len(approx) == 3:
-        cv2.putText(img, 'Triangle', (x, y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-    elif len(approx) == 4:
-        x1, y1, w, h = cv2.boundingRect(approx)
-        aspect_ratio = float(w) / h
-        if 0.95 <= aspect_ratio <= 1.05:
-            cv2.putText(img, 'Square', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
         else:
-            cv2.putText(img, 'Rectangle', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-    elif len(approx) == 5:
-        cv2.putText(img, 'Pentagon', (x, y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-    elif len(approx) == 6:
-        cv2.putText(img, 'Hexagon', (x, y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-    elif len(approx) == 8:
-        x1, y1, w, h = cv2.boundingRect(approx)
-        aspect_ratio = float(w) / h
-        if 0.95 <= aspect_ratio <= 1.05:
-            cv2.putText(img, 'Octagon', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-        else:
-            cv2.putText(img, 'Irregular Polygon', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-    else:
-        area = cv2.contourArea(approx)
-        perimeter = cv2.arcLength(approx, True)
-        circularity = 4 * math.pi * (area / (perimeter * perimeter))
-        if circularity > 0.8:
-            cv2.putText(img, 'Circle', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-        else:
-            cv2.putText(img, 'Irregular Shape', (x, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+            color = (0, 0, 200)
+            thic = 2
 
-# displaying the image after drawing contours
-cv2.imshow('shapes', img)
-#zapisz wygenerowany obraz jako ed_shapes.jpg
-cv2.imwrite('ed_shapes.jpg', img)
+        cv2.rectangle(img, (x, y), (x + w, y + h), color, thic)
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+        cv2.putText(img, str(cv2.countNonZero(imgCrop)), (x, y + h - 6), cv2.FONT_HERSHEY_PLAIN, 1,
+                    color, 2)
+
+    cvzone.putTextRect(img, f'Free: {spaces}/{len(posList)}', (50, 60), thickness=3, offset=20,
+                       colorR=(0, 200, 0))
+
+
+while True:
+
+    # Get image frame
+    success, img = cap.read()
+    if cap.get(cv2.CAP_PROP_POS_FRAMES) == cap.get(cv2.CAP_PROP_FRAME_COUNT):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    # img = cv2.imread('img.png')
+    imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    imgBlur = cv2.GaussianBlur(imgGray, (3, 3), 1)
+    # ret, imgThres = cv2.threshold(imgBlur, 150, 255, cv2.THRESH_BINARY)
+
+    val1 = cv2.getTrackbarPos("Val1", "Vals")
+    val2 = cv2.getTrackbarPos("Val2", "Vals")
+    val3 = cv2.getTrackbarPos("Val3", "Vals")
+    if val1 % 2 == 0: val1 += 1
+    if val3 % 2 == 0: val3 += 1
+    imgThres = cv2.adaptiveThreshold(imgBlur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                     cv2.THRESH_BINARY_INV, val1, val2)
+    imgThres = cv2.medianBlur(imgThres, val3)
+    kernel = np.ones((3, 3), np.uint8)
+    imgThres = cv2.dilate(imgThres, kernel, iterations=1)
+
+    checkSpaces()
+    # Display Output
+
+    cv2.imshow("Image", img)
+    # cv2.imshow("ImageGray", imgThres)
+    # cv2.imshow("ImageBlur", imgBlur)
+    key = cv2.waitKey(1)
+    if key == ord('r'):
+        pass
