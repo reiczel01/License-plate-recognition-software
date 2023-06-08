@@ -28,7 +28,7 @@ def mouseClick(events, x, y, flags, params):
             current_x, current_y = x, y
 
 while True:
-    img = cv2.imread('PPS-3-CAM-SCREEN-SAVE.png')
+    img = cv2.imread('PPS-3-CAM-RESIZED.png')
     for pos in posList:
         x1, y1, x2, y2 = pos
         cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 2)
