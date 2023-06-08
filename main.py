@@ -29,7 +29,7 @@ def checkSpaces():
         imgCrop = imgThres[y1:y2, x1:x2]
         count = cv2.countNonZero(imgCrop)
 
-        if count < 850:
+        if count < 100:
             color = (0, 200, 0)
             thic = 5
             spaces += 1
