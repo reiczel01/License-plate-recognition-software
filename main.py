@@ -3,33 +3,33 @@ import pickle
 import cvzone
 import numpy as np
 
-cap = cv2.VideoCapture('carPark.mp4')
-width, height = 103, 43
-with open('polygons', 'rb') as f:
+cap = cv2.VideoCapture('video/vid1.mp4')
+width, height = 1192, 668
+with open('TerminalPos', 'rb') as f:
     posList = pickle.load(f)
 
-
+print(posList)
 def empty(a):
     pass
 
 
 cv2.namedWindow("Vals")
-cv2.resizeWindow("Vals", 640, 240)
+cv2.resizeWindow("Vals", 1192, 668)
 cv2.createTrackbar("Val1", "Vals", 25, 50, empty)
 cv2.createTrackbar("Val2", "Vals", 16, 50, empty)
 cv2.createTrackbar("Val3", "Vals", 5, 50, empty)
 
 
+
 def checkSpaces():
     spaces = 0
     for pos in posList:
-        x, y = pos
-        w, h = width, height
+        x1, y1, x2, y2 = pos
 
-        imgCrop = imgThres[y:y + h, x:x + w]
+        imgCrop = imgThres[y1:y2, x1:x2]
         count = cv2.countNonZero(imgCrop)
 
-        if count < 900:
+        if count < 850:
             color = (0, 200, 0)
             thic = 5
             spaces += 1
@@ -38,9 +38,9 @@ def checkSpaces():
             color = (0, 0, 200)
             thic = 2
 
-        cv2.rectangle(img, (x, y), (x + w, y + h), color, thic)
+        cv2.rectangle(img, (x1, y1), (x2, y2), color, thic)
 
-        cv2.putText(img, str(cv2.countNonZero(imgCrop)), (x, y + h - 6), cv2.FONT_HERSHEY_PLAIN, 1,
+        cv2.putText(img, str(cv2.countNonZero(imgCrop)), (x1, y2 - 6), cv2.FONT_HERSHEY_PLAIN, 1,
                     color, 2)
 
     cvzone.putTextRect(img, f'Free: {spaces}/{len(posList)}', (50, 60), thickness=3, offset=20,
